@@ -35,6 +35,8 @@ class CommandHandler {
     void handleCdup(const std::string &argument);
     void handlePwd(const std::string &argument);
     void handlePasv(const std::string &argument);
+    void handleDele(const std::string &argument); 
+    void handleRmd(const std::string &argument);
 
     void sendResponse(int code, const std::string &message);
 };

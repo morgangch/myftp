@@ -69,12 +69,86 @@ void CommandHandler::handleList(const std::string &argument)
 
 void CommandHandler::handleMkd(const std::string &argument)
 {
-    (void) argument;
     if (!session)
         return;
 
+    std::string new_directory = argument.substr(argument.find(' ') + 1);
+    new_directory = new_directory.substr(0, new_directory.find('\r'));
+    new_directory = new_directory.substr(0, new_directory.find('\n'));
+    if (new_directory == "MKD") {
+        new_directory = "";
+    }
+    if (new_directory.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
     if (session->isAuthenticated()) {
-        session->sendResponse(COMMAND_NOT_IMPLEMENTED);
+        if (new_directory[0] == '/') {
+            new_directory = new_directory.substr(1);
+        }
+        if (session->directory.createDirectory(new_directory)) {
+            session->sendResponse(MKD_RESPONSE);
+        } else {
+            session->sendResponse(INVALID_ARGUMENT);
+        }
+    } else {
+        session->sendResponse(NOT_LOGGED_IN);
+    }
+}
+
+void CommandHandler::handleRmd(const std::string &argument)
+{
+    if (!session)
+        return;
+
+    std::string new_directory = argument.substr(argument.find(' ') + 1);
+    new_directory = new_directory.substr(0, new_directory.find('\r'));
+    new_directory = new_directory.substr(0, new_directory.find('\n'));
+    if (new_directory == "RMD") {
+        new_directory = "";
+    }
+    if (new_directory.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
+    if (session->isAuthenticated()) {
+        if (new_directory[0] == '/') {
+            new_directory = new_directory.substr(1);
+        }
+        if (session->directory.removeDirectory(new_directory)) {
+            session->sendResponse(RMD_RESPONSE);
+        } else {
+            session->sendResponse(INVALID_ARGUMENT);
+        }
+    } else {
+        session->sendResponse(NOT_LOGGED_IN);
+    }
+}
+
+void CommandHandler::handleDele(const std::string &argument)
+{
+    if (!session)
+        return;
+
+    std::string new_file = argument.substr(argument.find(' ') + 1);
+    new_file = new_file.substr(0, new_file.find('\r'));
+    new_file = new_file.substr(0, new_file.find('\n'));
+    if (new_file == "DELE") {
+        new_file = "";
+    }
+    if (new_file.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
+    if (session->isAuthenticated()) {
+        if (new_file[0] == '/') {
+            new_file = new_file.substr(1);
+        }
+        if (session->directory.removeFile(new_file)) {
+            session->sendResponse(DELE_RESPONSE);
+        } else {
+            session->sendResponse(INVALID_ARGUMENT);
+        }
     } else {
         session->sendResponse(NOT_LOGGED_IN);
     }
@@ -255,6 +329,7 @@ void CommandHandler::handleCommand(const std::string &command)
     if (!session)
         return;
 
+    session->directory.currentDirectory = session->currentDirectory;
     std::string cmd = command.substr(0, command.find(' '));
     std::map<std::string, void (CommandHandler::*)(const std::string &)>
         command_map = {
@@ -272,6 +347,8 @@ void CommandHandler::handleCommand(const std::string &command)
             {"CDUP", &CommandHandler::handleCdup},
             {"PWD", &CommandHandler::handlePwd},
             {"PASV", &CommandHandler::handlePasv},
+            {"DELE", &CommandHandler::handleDele},
+            {"RMD", &CommandHandler::handleRmd},
         };
     cmd = cmd.substr(0, cmd.find('\r'));
     cmd = cmd.substr(0, cmd.find('\n'));

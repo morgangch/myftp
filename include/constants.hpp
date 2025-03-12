@@ -39,3 +39,7 @@
 #define PWD_RESPONSE "257 Current directory is"
 #define PASV_RESPONSE "227 Entering passive mode"
 #define PORT_RESPONSE "200 Entering active mode"
+#define EXIT_RESPONSE "221 Server closing connection"
+#define MKD_RESPONSE "257 Directory created"
+#define RMD_RESPONSE "250 Directory deleted"
+#define DELE_RESPONSE "250 File deleted"

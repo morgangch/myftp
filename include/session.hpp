@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "auth.hpp"
+#include "directory.hpp"
 
 enum class DataMode { PASSIVE, ACTIVE };
 
@@ -56,6 +57,7 @@ class Session {
     void reset();
     void closeSession();
     Auth auth;
+    Directory directory;
     std::string currentDirectory;
     std::string getRootDirectory() const
     {
