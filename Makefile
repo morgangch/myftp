@@ -1,38 +1,24 @@
-##
-## EPITECH PROJECT, 2025
-## PDGRUSH3
-## File description:
-## Makefile
-##
+CC = g++
+CFLAGS = -Wall -Wextra -Iinclude
+SRC = src/main.cpp src/auth.cpp src/client.cpp src/command_handler.cpp src/ftp_server.cpp src/session.cpp src/transfer.cpp
+NAME = myftp
+OBJ = $(SRC:.cpp=.o)
 
-NAME	=	myftp
-SRC	=	$(wildcard ./*.cpp ./src/*.cpp ./src/handlers/*.cpp ./src/utils/*.cpp)
-CFLAGS	=	-Wall -Wextra -Iinclude -Isrc -Isrc/handlers -I.
-CC	=	/usr/bin/g++
+all: $(NAME)
 
-all:	$(NAME)
+$(NAME): $(OBJ)
+	$(CC) -o $(NAME) $(OBJ)
 
-$(NAME):	$(SRC)
-	$(CC) $(CFLAGS) $(SRC) -o $(NAME)
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) *.gch src/*.gch
+	rm -f $(OBJ) $(NAME)
 
 fclean: clean
 	rm -f $(NAME)
-
 re: fclean all
-
-test: 
-	$(CC) -o $(NAME) $(SRC) -lcriterion --coverage $(CFLAGS)
-	
-tests_run: test
-	./$(NAME)
-
-tests_re: fclean tests_run
-
-tests_gcovr: tests_re
-	gcovr --exclude tests/
-
 debug: CFLAGS += -g3
 debug: re
+
+.PHONY: all clean fclean re debug
