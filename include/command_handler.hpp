@@ -3,7 +3,6 @@
 
 #include <string>
 #include "session.hpp"
-#include "ftp_constants.hpp"
 
 class CommandHandler {
   public:

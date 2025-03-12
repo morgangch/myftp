@@ -6,7 +6,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "constants.hpp"
-#include "ftp_constants.hpp"
 
 Session::Session(int client_socket)
     : clientSocket(client_socket), dataMode(DataMode::PASSIVE)

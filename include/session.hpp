@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include "auth.hpp"
-#include "ftp_constants.hpp"
 
 enum class DataMode { PASSIVE, ACTIVE };
 

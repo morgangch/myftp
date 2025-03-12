@@ -7,7 +7,6 @@
 #include "constants.hpp"
 #include "session.hpp"
 #include "transfer.hpp"
-#include "ftp_constants.hpp"
 
 CommandHandler::CommandHandler(Session *session) : session(session)
 {
