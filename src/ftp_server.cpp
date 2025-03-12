@@ -50,11 +50,18 @@ void FtpServer::run()
                     if (fds[i].fd == server_socket) {
                         handleNewConnection();
                     } else {
-                        handleClientRequest(fds[i].fd, client_sessions[fds[i].fd]);
-                        if (commandHandler->hasJustQuitted()) {
-                            close(fds[i].fd);
-                            fds.erase(fds.begin() + i);
-                            client_sessions.erase(fds[i].fd);
+                        auto it = client_sessions.find(fds[i].fd);
+                        if (it != client_sessions.end()) {  // Vérifier que la session existe bien
+                            handleClientRequest(fds[i].fd, it->second);
+                            if (commandHandler->justQuit) {
+                                close(fds[i].fd);
+                                client_sessions.erase(it);  // Supprimer la session proprement
+                                fds.erase(fds.begin() + i);
+                                i--;  // Important : décrémenter `i` après suppression pour éviter un accès invalide
+                                commandHandler->justQuit = false;
+                            }
+                        } else {
+                            std::cerr << "Erreur : session introuvable pour le client " << fds[i].fd << std::endl;
                         }
                     }
                 }
@@ -76,8 +83,7 @@ void FtpServer::handleNewConnection()
     }
     fds.push_back({client_fd, POLLIN, 0});
     std::cout << "New client connected: " << client_fd << std::endl;
-    Session session(client_fd);
-    client_sessions[client_fd] = Session(client_fd);
+    client_sessions.emplace(client_fd, client_fd);
     client_sessions[client_fd].sendResponse(LOGIN_RESPONSE);
 }
 
