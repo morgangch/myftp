@@ -9,9 +9,10 @@ enum class DataMode { PASSIVE, ACTIVE };
 
 class Session {
   public:
-    Session(int clientSocket);
-    Session();
-    void setUser(const std::string &username);
+  Session(); // Add this default constructor declaration
+  Session(int clientSocket, const std::string &rootDirectory);
+  Session(const std::string &rootDirectory);
+  void setUser(const std::string &username);
     void setPassword(const std::string &password);
     std::string getUser() const { return auth.getUsername(); }
     bool isAuthenticated() const
@@ -52,6 +53,12 @@ class Session {
     void reset();
     void closeSession();
     Auth auth;
+    std::string currentDirectory;
+    std::string getRootDirectory() const
+    {
+        return currentDirectory;
+    }
+    std::string getFiles();
 
   private:
     int clientSocket;
@@ -61,6 +68,7 @@ class Session {
     std::vector<std::string> commandHistory;
     DataMode dataMode;
     int commandCount;
+    std::string const rootDirectory;
 };
 
 #endif // SESSION_HPP

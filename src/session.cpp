@@ -7,17 +7,37 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Session::Session(int client_socket)
+#include "session.hpp"
+#include "constants.hpp"
+#include <cstring>
+#include <iostream>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+Session::Session(int client_socket, const std::string &rootDirectory)
     : clientSocket(client_socket), authenticated(false), dataMode(DataMode::PASSIVE),
-      commandCount(0) {
+      commandCount(0), rootDirectory(rootDirectory), currentDirectory(rootDirectory) {
   for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
     commandHistory.push_back("");
   }
   auth = Auth();
 }
 
+Session::Session(const std::string &rootDirectory)
+    : clientSocket(-1), authenticated(false), dataMode(DataMode::PASSIVE), 
+      commandCount(0), rootDirectory(rootDirectory), currentDirectory(rootDirectory) {
+  for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
+    commandHistory.push_back("");
+  }
+  auth = Auth();
+}
+
+// Add a default constructor that uses a default root directory
 Session::Session()
-    : clientSocket(-1), authenticated(false), dataMode(DataMode::PASSIVE), commandCount(0) {
+    : clientSocket(-1), authenticated(false), dataMode(DataMode::PASSIVE),
+      commandCount(0), rootDirectory("./"), currentDirectory("./") {
   for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
     commandHistory.push_back("");
   }
@@ -52,4 +72,21 @@ void Session::closeSession() {
 void Session::reset() {
   commandCount = 0;
   dataMode = DataMode::PASSIVE;
+}
+
+std::string Session::getFiles() {
+  std::string files = "";
+  FILE *fp;
+  char path[1035];
+  std::string command = "ls -l " + currentDirectory;
+  fp = popen(command.c_str(), "r");
+  if (fp == NULL) {
+    std::cerr << "Failed to run command" << std::endl;
+    return "";
+  }
+  while (fgets(path, sizeof(path), fp) != NULL) {
+    files += path;
+  }
+  pclose(fp);
+  return files;
 }

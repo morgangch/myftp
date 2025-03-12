@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         return 84;
     }
     const std::string directory_path(argv[2]);
-    FtpServer ftp_server(port);
+    FtpServer ftp_server(port, directory_path);
     try {
         ftp_server.run();
     } catch (const std::exception &e) {

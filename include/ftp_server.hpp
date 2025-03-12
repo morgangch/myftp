@@ -9,7 +9,7 @@
 
 class FtpServer {
   public:
-    FtpServer(int port);
+    FtpServer(int port, std::string const rootDirectory);
     ~FtpServer();
     void run();
 
@@ -21,6 +21,7 @@ class FtpServer {
     CommandHandler *commandHandler;
     void handleNewConnection();
     void handleClientRequest(int client_fd, Session &session);
+    std::string const rootDirectory;
 };
 
 #endif // FTP_SERVER_HPP

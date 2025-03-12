@@ -10,7 +10,7 @@
 #include "constants.hpp"
 #include "command_handler.hpp"
 
-FtpServer::FtpServer(int port) : port(port)
+FtpServer::FtpServer(int port, std::string const rootDirectory) : port(port), rootDirectory(rootDirectory)
 {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
@@ -86,7 +86,8 @@ void FtpServer::handleNewConnection()
     }
     fds.push_back({client_fd, POLLIN, 0});
     std::cout << "New client connected: " << client_fd << std::endl;
-    client_sessions.emplace(client_fd, client_fd);
+    client_sessions.emplace(client_fd, Session(rootDirectory));
+    client_sessions[client_fd].setSocket(client_fd);
     client_sessions[client_fd].sendResponse(LOGIN_RESPONSE);
 }
 

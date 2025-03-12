@@ -60,7 +60,8 @@ void CommandHandler::handleList(const std::string &argument)
         return;
 
     if (session->isAuthenticated()) {
-        session->sendResponse(COMMAND_NOT_IMPLEMENTED);
+        std::string files = session->getFiles();
+        session->sendResponse(files);
     } else {
         session->sendResponse(NOT_LOGGED_IN);
     }

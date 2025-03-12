@@ -22,7 +22,7 @@ class Group {
 class User {
   public:
     User(const std::string name, const std::string &password)
-        : username(name), password(password)
+        : password(password), username(name)
     {
     }
     std::string getPassword() const
