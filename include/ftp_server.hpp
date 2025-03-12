@@ -20,7 +20,7 @@ class FtpServer {
     std::map<int, Session> client_sessions;
     CommandHandler *commandHandler;
     void handleNewConnection();
-    void handleClientRequest(int client_fd);
+    void handleClientRequest(int client_fd, Session &session);
 };
 
 #endif // FTP_SERVER_HPP

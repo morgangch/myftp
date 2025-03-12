@@ -50,7 +50,12 @@ void FtpServer::run()
                     if (fds[i].fd == server_socket) {
                         handleNewConnection();
                     } else {
-                        handleClientRequest(fds[i].fd);
+                        handleClientRequest(fds[i].fd, client_sessions[fds[i].fd]);
+                        if (commandHandler->hasJustQuitted()) {
+                            close(fds[i].fd);
+                            fds.erase(fds.begin() + i);
+                            client_sessions.erase(fds[i].fd);
+                        }
                     }
                 }
             }
@@ -73,11 +78,10 @@ void FtpServer::handleNewConnection()
     std::cout << "New client connected: " << client_fd << std::endl;
     Session session(client_fd);
     client_sessions[client_fd] = Session(client_fd);
-    commandHandler->setSession(&client_sessions[client_fd]);
     client_sessions[client_fd].sendResponse(LOGIN_RESPONSE);
 }
 
-void FtpServer::handleClientRequest(int client_fd)
+void FtpServer::handleClientRequest(int client_fd, Session &session)
 {
     char buffer[BUFFER_SIZE];
     memset(buffer, 0, sizeof(buffer));
@@ -88,6 +92,7 @@ void FtpServer::handleClientRequest(int client_fd)
         std::cout << "Client disconnected: " << client_fd << std::endl;
         return;
     }
+    commandHandler->setSession(&session);
     commandHandler->handleCommand(buffer);
 }
 

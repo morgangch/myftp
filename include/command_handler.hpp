@@ -17,6 +17,10 @@ class CommandHandler {
     {
         return session;
     }
+    bool hasJustQuitted()
+    {
+        return justQuit;
+    }
 
   private:
     Session *session;
@@ -28,6 +32,7 @@ class CommandHandler {
     void handleQuit(const std::string &argument);
     void handleCwd(const std::string &argument);
 
+    bool justQuit = false;
     void sendResponse(int code, const std::string &message);
 };
 

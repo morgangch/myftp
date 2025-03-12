@@ -97,6 +97,7 @@ void CommandHandler::handleQuit(const std::string &argument)
 
     session->sendResponse(LOGOUT_RESPONSE);
     session->closeSession();
+    this->justQuit = true;
 }
 
 void CommandHandler::handleCommand(const std::string &command)
@@ -119,6 +120,7 @@ void CommandHandler::handleCommand(const std::string &command)
     auto it = command_map.find(cmd);
     if (it != command_map.end()) {
         (this->*(it->second))(command);
+        session->addCommandToHistory(command);
     } else {
         session->sendResponse("502 Command not implemented.");
     }
