@@ -26,7 +26,7 @@ FtpServer::FtpServer(int port) : port(port)
             sizeof(server_addr))
         < 0) {
         perror("Bind failed");
-        close(server_socket);
+        shutdown(server_socket, SHUT_RDWR);
         exit(84);
     }
     commandHandler = new CommandHandler();
@@ -51,14 +51,17 @@ void FtpServer::run()
                         handleNewConnection();
                     } else {
                         auto it = client_sessions.find(fds[i].fd);
-                        if (it != client_sessions.end()) {  // Vérifier que la session existe bien
+                        if (it != client_sessions.end()) {
                             handleClientRequest(fds[i].fd, it->second);
                             if (commandHandler->justQuit) {
                                 close(fds[i].fd);
-                                client_sessions.erase(it);  // Supprimer la session proprement
+                                client_sessions.erase(it);
                                 fds.erase(fds.begin() + i);
-                                i--;  // Important : décrémenter `i` après suppression pour éviter un accès invalide
+                                i--;
                                 commandHandler->justQuit = false;
+                            }
+                            if (commandHandler->justExit) {
+                                delete this;
                             }
                         } else {
                             std::cerr << "Erreur : session introuvable pour le client " << fds[i].fd << std::endl;
@@ -108,4 +111,6 @@ FtpServer::~FtpServer()
     for (const auto &client : fds) {
         close(client.fd);
     }
+    delete commandHandler;
+    exit(0);
 }

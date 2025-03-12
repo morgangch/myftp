@@ -11,7 +11,6 @@ public:
     ~Client();
 
     void setUsername(const std::string& username);
-    std::string getUsername() const;
 
     void setAuthenticated(bool authenticated);
     bool isAuthenticated() const;
@@ -25,10 +24,10 @@ public:
     int getSocketFd() const;
 
 private:
-    int socket_fd; // Socket file descriptor for the client connection
-    std::string username; // Username of the connected client
-    bool authenticated; // Authentication status of the client
-    char buffer[BUFFER_SIZE]; // Buffer for receiving data
+    int socket_fd;
+    std::string username;
+    bool authenticated;
+    char buffer[BUFFER_SIZE];
 };
 
 #endif // CLIENT_HPP

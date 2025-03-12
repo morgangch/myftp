@@ -8,9 +8,8 @@
 #include <unistd.h>
 
 Session::Session(int client_socket)
-    : clientSocket(client_socket), dataMode(DataMode::PASSIVE),
-      authenticated(false) {
-  commandCount = 0;
+    : clientSocket(client_socket), authenticated(false), dataMode(DataMode::PASSIVE),
+      commandCount(0) {
   for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
     commandHistory.push_back("");
   }
@@ -18,8 +17,7 @@ Session::Session(int client_socket)
 }
 
 Session::Session()
-    : clientSocket(-1), dataMode(DataMode::PASSIVE), authenticated(false) {
-  commandCount = 0;
+    : clientSocket(-1), authenticated(false), dataMode(DataMode::PASSIVE), commandCount(0) {
   for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
     commandHistory.push_back("");
   }

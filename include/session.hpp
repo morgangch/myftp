@@ -13,7 +13,7 @@ class Session {
     Session();
     void setUser(const std::string &username);
     void setPassword(const std::string &password);
-    std::string getUser() const;
+    std::string getUser() const { return auth.getUsername(); }
     bool isAuthenticated() const
     {
         return authenticated;
