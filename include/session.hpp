@@ -9,12 +9,15 @@ enum class DataMode { PASSIVE, ACTIVE };
 
 class Session {
   public:
-  Session(); // Add this default constructor declaration
-  Session(int clientSocket, const std::string &rootDirectory);
-  Session(const std::string &rootDirectory);
-  void setUser(const std::string &username);
+    Session(); // Add this default constructor declaration
+    Session(int clientSocket, const std::string &rootDirectory);
+    Session(const std::string &rootDirectory);
+    void setUser(const std::string &username);
     void setPassword(const std::string &password);
-    std::string getUser() const { return auth.getUsername(); }
+    std::string getUser() const
+    {
+        return auth.getUsername();
+    }
     bool isAuthenticated() const
     {
         return authenticated;
@@ -56,7 +59,7 @@ class Session {
     std::string currentDirectory;
     std::string getRootDirectory() const
     {
-        return currentDirectory;
+        return rootDirectory;
     }
     std::string getFiles();
 

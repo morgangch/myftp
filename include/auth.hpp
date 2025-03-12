@@ -77,10 +77,8 @@ class Auth {
                     if (g.getName() == group) {
                         return true;
                     }
-                    printf("Group: %s\n", g.getName().c_str());
                 }
             }
-            printf("User: %s\n", u.getUsername().c_str());
         }
         return false;
     }
