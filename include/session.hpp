@@ -60,11 +60,11 @@ class Session {
     void closeSession();
     Auth auth;
     Directory directory;
-    std::string currentDirectory;
     std::string getRootDirectory() const
     {
         return rootDirectory;
     }
+    std::string currentDirectory;
     std::string getFiles();
     char transferType = 'A';
     int transferPort = -1;
@@ -77,7 +77,7 @@ class Session {
     bool authenticated;
     std::vector<std::string> commandHistory;
     DataMode dataMode;
-    int commandCount;
+    int commandCount = 0;
     std::string const rootDirectory;
 };
 

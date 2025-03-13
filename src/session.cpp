@@ -9,39 +9,37 @@
 #include "session.hpp"
 
 Session::Session(int client_socket, const std::string &rootDirectory)
-    : clientSocket(client_socket), authenticated(false),
+    : auth(), directory(Directory(rootDirectory)), currentDirectory(rootDirectory),
+      clientSocket(client_socket), authenticated(false),
       dataMode(DataMode::PASSIVE), commandCount(0),
-      currentDirectory(rootDirectory), rootDirectory(rootDirectory),
-      directory(Directory(rootDirectory))
+      rootDirectory(rootDirectory)
 {
     for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
         commandHistory.push_back("");
     }
-    auth = Auth();
-    directory = Directory(rootDirectory);
 }
 
 Session::Session(const std::string &rootDirectory)
-    : clientSocket(-1), authenticated(false), dataMode(DataMode::PASSIVE),
-      commandCount(0), rootDirectory(rootDirectory),
-      currentDirectory(rootDirectory), directory(Directory(rootDirectory))
+    : auth(), directory(Directory(rootDirectory)), currentDirectory(rootDirectory),
+      clientSocket(-1), authenticated(false),
+      dataMode(DataMode::PASSIVE), commandCount(0),
+      rootDirectory(rootDirectory)
 {
     for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
         commandHistory.push_back("");
     }
-    auth = Auth();
 }
 
 // Add a default constructor that uses a default root directory
 Session::Session()
-    : clientSocket(-1), currentDirectory("./"), authenticated(false),
-      dataMode(DataMode::PASSIVE), commandCount(0), rootDirectory("./"),
-      directory(Directory("./"))
+    : auth(), directory(Directory("./")), currentDirectory("./"), 
+      clientSocket(-1), authenticated(false),
+      dataMode(DataMode::PASSIVE), commandCount(0),
+      rootDirectory("./")
 {
     for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
         commandHistory.push_back("");
     }
-    auth = Auth();
 }
 
 Session::~Session()
