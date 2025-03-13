@@ -1,0 +1,115 @@
+#!/usr/bin/env python3
+import os
+import sys
+import time
+import subprocess
+import threading
+from pathlib import Path
+import signal
+
+
+class MyFTPRunner:
+
+    def __init__(self, port, num_runs):
+        self.port = port
+        self.num_runs = num_runs
+        self.server_process = None
+        # Set the source directory as one level above the directory of this script
+        script_dir = Path(__file__).resolve().parent
+        self.source_dir = script_dir.parent
+
+    def run_make(self):
+        print("Running make...")
+        result = subprocess.run(["make"], cwd=str(self.source_dir))
+        if result.returncode != 0:
+            print("Make failed.")
+            sys.exit(1)
+
+    def start_server(self):
+        # Start myftp in the background using the provided port and current directory
+        server_cmd = f"./myftp {self.port} ."
+        print(f"Starting myftp on port {self.port} with directory '.'...")
+        # Use shell=True so we can pass the command as one string
+        self.server_process = subprocess.Popen(server_cmd, cwd=str(self.source_dir), shell=True)
+        time.sleep(2)
+
+    def kill_server(self):
+        if self.server_process:
+            try:
+                self.server_process.kill()
+            except Exception:
+                pass
+            self.server_process.wait()
+            
+    def kill_all_nc(self):
+        print("Killing all nc instances...")
+        try:
+            result = subprocess.run(["pgrep", "-f", "nc -C"], stdout=subprocess.PIPE, text=True)
+            if result.stdout:
+                pids = result.stdout.strip().split("\n")
+                for pid in pids:
+                    print(f"Killing nc process {pid}")
+                    os.kill(int(pid), signal.SIGTERM)
+        except Exception as e:
+            print(f"Error killing nc processes: {e}")
+
+
+class TelnetTester(threading.Thread):
+
+    def __init__(self, port, delay):
+        super().__init__()
+        self.port = port
+        self.delay = delay
+
+    def run(self):
+        time.sleep(self.delay)
+        print(f"Launching nc session with delay {self.delay}...")
+        try:
+            # Envoie un USER et PASS puis ferme nc proprement
+                # ["sh", "-c", f'echo -en "USER Anonymous\nPASS" | nc -C 127.0.0.1 {self.port}'],
+            subprocess.run(
+                ["nc", "-C", "127.0.0.1", str(self.port)],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                text=True
+            )
+        except Exception as e:
+            print(f"Error launching nc: {e}")
+
+            
+def main():
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} <port> <num_runs>")
+        sys.exit(1)
+    
+    try:
+        port = int(sys.argv[1])
+        num_runs = int(sys.argv[2])
+    except ValueError:
+        print("Error: port and num_runs must be integers")
+        sys.exit(1)
+        
+    ftp_runner = MyFTPRunner(port, num_runs)
+    ftp_runner.run_make()
+    ftp_runner.start_server()
+    # Change working directory to source_dir
+    os.chdir(str(ftp_runner.source_dir))
+    # Launch telnet sessions with incremental delay (each thread has a delay before execution)
+    threads = []
+    for i in range(num_runs):
+        # Delay of i seconds for each session
+        t = TelnetTester(port, delay=i)
+        t.start()
+        threads.append(t)
+        
+    for t in threads:
+        t.join(timeout=1)  # Longer timeout to ensure threads complete
+
+    # Kill the myftp server after testing
+    ftp_runner.kill_all_nc()
+    ftp_runner.kill_server()
+    print("Testing complete.")
+
+
+if __name__ == "__main__":
+    main()
