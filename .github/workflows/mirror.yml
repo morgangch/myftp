@@ -11,6 +11,7 @@ on:
 
 jobs:
   check_repo:
+    if: ${{ github.event_name == 'push' && github.actor != 'github-actions[bot]' && startsWith(github.repository, 'morgangch/')}}
     name: "Checks if the repository is clean and void of any unwanted files (temp files, binary files, etc.)"
     runs-on: ubuntu-latest
     steps:
