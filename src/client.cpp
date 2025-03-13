@@ -10,7 +10,7 @@ Client::Client(int socket_fd) : socket_fd(socket_fd), authenticated(false) {
 }
 
 void Client::sendResponse(const std::string& response) {
-    send(socket_fd, response.c_str(), response.length(), 0);
+    write(socket_fd, response.c_str(), response.size());
 }
 
 std::string Client::receiveCommand() {

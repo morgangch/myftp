@@ -65,9 +65,8 @@ void FtpServer::run()
                                 delete this;
                             }
                         } else {
-                            std::cerr << "Erreur : session introuvable pour "
-                                         "le client "
-                                      << fds[i].fd << std::endl;
+                            std::cerr << "Client " << fds[i].fd
+                                      << ": session not found" << std::endl;
                         }
                     }
                 }
@@ -88,7 +87,7 @@ void FtpServer::handleNewConnection()
         return;
     }
     fds.push_back({client_fd, POLLIN, 0});
-    std::cout << "New client connected: " << client_fd << std::endl;
+    std::cout << "Client " << client_fd << ": connected" << std::endl;
     client_sessions.emplace(client_fd, Session(rootDirectory));
     client_sessions[client_fd].setSocket(client_fd);
     client_sessions[client_fd].sendResponse(LOGIN_RESPONSE);
@@ -96,15 +95,18 @@ void FtpServer::handleNewConnection()
 
 void FtpServer::handleClientRequest(int client_fd, Session &session)
 {
-    char buffer[BUFFER_SIZE];
-    memset(buffer, 0, sizeof(buffer));
-    size_t bytes_received = read(client_fd, buffer, sizeof(buffer));
+    char buffer[BUFFER_SIZE] = {0};
+    size_t bytes_received = read(client_fd, buffer, sizeof(buffer) - 1); // -1 pour le \0
 
     if (bytes_received <= 0) {
         close(client_fd);
-        std::cout << "Client disconnected: " << client_fd << std::endl;
+        std::cout << "Client " << client_fd << ": disconnected" << std::endl;
         return;
     }
+    
+    buffer[bytes_received] = '\0'; // Ajout de \0 pour éviter des erreurs de lecture
+    std::cout << "Client " << client_fd << ": received (" << bytes_received << " bytes): " << buffer << std::endl;
+
     commandHandler->setSession(&session);
     commandHandler->handleCommand(buffer);
 }
@@ -115,11 +117,6 @@ FtpServer::~FtpServer()
     for (const auto &client : fds) {
         close(client.fd);
     }
-    // fds.clear();
     delete commandHandler;
-    // for (auto &client : client_sessions) {
-    //     close(client.first);
-    //     delete &client.second;
-    // }
     exit(0);
 }
