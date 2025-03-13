@@ -10,7 +10,8 @@
 #include "constants.hpp"
 #include "command_handler.hpp"
 
-FtpServer::FtpServer(int port, std::string const rootDirectory) : port(port), rootDirectory(rootDirectory)
+FtpServer::FtpServer(int port, std::string const rootDirectory)
+    : port(port), rootDirectory(rootDirectory)
 {
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     if (server_socket < 0) {
@@ -47,7 +48,7 @@ void FtpServer::run()
         try {
             for (size_t i = 0; i < fds.size(); i++) {
                 if (fds[i].revents & POLLIN) {
-                    if (fds[i].fd == server_socket) {
+                    if (fds.at(i).fd == server_socket) {
                         handleNewConnection();
                     } else {
                         auto it = client_sessions.find(fds[i].fd);
@@ -64,7 +65,9 @@ void FtpServer::run()
                                 delete this;
                             }
                         } else {
-                            std::cerr << "Erreur : session introuvable pour le client " << fds[i].fd << std::endl;
+                            std::cerr << "Erreur : session introuvable pour "
+                                         "le client "
+                                      << fds[i].fd << std::endl;
                         }
                     }
                 }
@@ -112,6 +115,11 @@ FtpServer::~FtpServer()
     for (const auto &client : fds) {
         close(client.fd);
     }
+    // fds.clear();
     delete commandHandler;
+    // for (auto &client : client_sessions) {
+    //     close(client.first);
+    //     delete &client.second;
+    // }
     exit(0);
 }

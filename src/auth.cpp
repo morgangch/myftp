@@ -20,6 +20,13 @@ Auth::Auth()
 
 }
 
+void Auth::reset()
+{
+    fullAuthenticated = false;
+    userAuthenticated = false;
+    user = "";
+}
+
 bool Auth::validateLogin(
     const std::string &username, const std::string &password)
 {

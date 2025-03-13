@@ -37,6 +37,10 @@ class CommandHandler {
     void handlePasv(const std::string &argument);
     void handleDele(const std::string &argument); 
     void handleRmd(const std::string &argument);
+    void handlePort(const std::string &argument);
+    void handleType(const std::string &argument);
+    void handleSyst(const std::string &argument);
+    void handleNoop(const std::string &argument);
 
     void sendResponse(int code, const std::string &message);
 };

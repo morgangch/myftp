@@ -6,20 +6,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "constants.hpp"
-
-#include <cstring>
-#include <iostream>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include "constants.hpp"
 #include "session.hpp"
 
 Session::Session(int client_socket, const std::string &rootDirectory)
     : clientSocket(client_socket), authenticated(false),
-      dataMode(DataMode::PASSIVE), commandCount(0), currentDirectory(rootDirectory),
-      rootDirectory(rootDirectory), directory(Directory(rootDirectory))
+      dataMode(DataMode::PASSIVE), commandCount(0),
+      currentDirectory(rootDirectory), rootDirectory(rootDirectory),
+      directory(Directory(rootDirectory))
 {
     for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
         commandHistory.push_back("");
@@ -42,12 +35,22 @@ Session::Session(const std::string &rootDirectory)
 // Add a default constructor that uses a default root directory
 Session::Session()
     : clientSocket(-1), currentDirectory("./"), authenticated(false),
-      dataMode(DataMode::PASSIVE), commandCount(0), rootDirectory("./"), directory(Directory("./"))
+      dataMode(DataMode::PASSIVE), commandCount(0), rootDirectory("./"),
+      directory(Directory("./"))
 {
     for (int i = 0; i < MAX_COMMAND_HISTORY; i++) {
         commandHistory.push_back("");
     }
     auth = Auth();
+}
+
+Session::~Session()
+{
+    if (clientSocket != -1) {
+        close(clientSocket);
+    }
+    commandHistory.clear();
+    this->reset();
 }
 
 void Session::addCommandToHistory(const std::string &command)

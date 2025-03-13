@@ -43,6 +43,8 @@ class User {
 class Auth {
   public:
     Auth();
+
+    void reset();
     bool validateUser(
         const std::string &username);
 

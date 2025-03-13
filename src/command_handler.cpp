@@ -17,8 +17,8 @@ void CommandHandler::handleUser(const std::string &command)
     if (!session)
         return;
     if (session->isAuthenticated()) {
-        session->sendResponse(PASS_RESPONSE);
-        return;
+        session->setAuthenticated(false);
+        session->auth.reset();
     }
     std::string username = command.substr(command.find(' ') + 1);
     username = username.substr(0, username.find('\r'));
@@ -34,12 +34,12 @@ void CommandHandler::handlePass(const std::string &argument)
 {
     if (!session)
         return;
-
     std::string password = argument.substr(argument.find(' ') + 1);
     password = password.substr(0, password.find('\r'));
     password = password.substr(0, password.find('\n'));
     if (!session->auth.hasUsername() || session->isAuthenticated()) {
-        session->sendResponse(NOT_LOGGED_IN);
+        session->sendResponse(session->auth.hasUsername() ? NOT_LOGGED_IN
+                                                         : INVALID_SEQUENCE);
         return;
     }
     if (password == "PASS") {
@@ -157,8 +157,8 @@ void CommandHandler::handleDele(const std::string &argument)
 void CommandHandler::handleCwd(const std::string &argument)
 {
     if (!session)
-    return;
-    
+        return;
+
     if (session->isAuthenticated()) {
         std::string new_directory = argument.substr(argument.find(' ') + 1);
         new_directory = new_directory.substr(0, new_directory.find('\r'));
@@ -177,7 +177,8 @@ void CommandHandler::handleCwd(const std::string &argument)
                 return;
             }
             new_directory = new_directory.substr(1);
-            session->currentDirectory = session->getRootDirectory() + "/" + new_directory;
+            session->currentDirectory =
+                session->getRootDirectory() + "/" + new_directory;
             session->sendResponse(CWD_RESPONSE);
             return;
         }
@@ -189,7 +190,8 @@ void CommandHandler::handleCwd(const std::string &argument)
             session->currentDirectory = session->currentDirectory.substr(
                 0, session->currentDirectory.find_last_of('/'));
         } else {
-            std::string new_path = session->currentDirectory + "/" + new_directory;
+            std::string new_path =
+                session->currentDirectory + "/" + new_directory;
             if (access(new_path.c_str(), F_OK) == -1) {
                 session->sendResponse(INVALID_ARGUMENT);
                 return;
@@ -250,10 +252,19 @@ void CommandHandler::handlePasv(const std::string &argument)
 
 void CommandHandler::handleRetr(const std::string &argument)
 {
-    (void) argument;
     if (!session)
         return;
+    std::string new_file = argument.substr(argument.find(' ') + 1);
+    new_file = new_file.substr(0, new_file.find('\r'));
+    new_file = new_file.substr(0, new_file.find('\n'));
 
+    if (new_file == "RETR") {
+        new_file = "";
+    }
+    if (new_file.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
     if (session->isAuthenticated()) {
         session->sendResponse(COMMAND_NOT_IMPLEMENTED);
     } else {
@@ -263,10 +274,18 @@ void CommandHandler::handleRetr(const std::string &argument)
 
 void CommandHandler::handleStor(const std::string &argument)
 {
-    (void) argument;
     if (!session)
         return;
-
+    std::string new_file = argument.substr(argument.find(' ') + 1);
+    new_file = new_file.substr(0, new_file.find('\r'));
+    new_file = new_file.substr(0, new_file.find('\n'));
+    if (new_file == "STOR") {
+        new_file = "";
+    }
+    if (new_file.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
     if (session->isAuthenticated()) {
         session->sendResponse(COMMAND_NOT_IMPLEMENTED);
     } else {
@@ -283,6 +302,69 @@ void CommandHandler::handleQuit(const std::string &argument)
     session->sendResponse(LOGOUT_RESPONSE);
     session->closeSession();
     this->justQuit = true;
+}
+
+void CommandHandler::handlePort(const std::string &argument)
+{
+    (void) argument;
+    if (!session)
+        return;
+
+    if (session->isAuthenticated()) {
+        session->setTransferMode(false);
+        session->sendResponse(PORT_RESPONSE);
+    } else {
+        session->sendResponse(NOT_LOGGED_IN);
+    }
+}
+
+void CommandHandler::handleType(const std::string &argument)
+{
+    if (!session)
+        return;
+
+    std::string type = argument.substr(argument.find(' ') + 1);
+    type = type.substr(0, type.find('\r'));
+    type = type.substr(0, type.find('\n'));
+    if (type == "TYPE") {
+        type = "";
+    }
+    if (type.empty()) {
+        session->sendResponse(INVALID_ARGUMENT);
+        return;
+    }
+    if (session->isAuthenticated()) {
+        if (type == "I" || type == "A") {
+            session->transferType = type[0];
+            session->sendResponse(DIRECTORY_ACTION_OK);
+        } else {
+            session->sendResponse(INVALID_ARGUMENT);
+        }
+    } else {
+        session->sendResponse(NOT_LOGGED_IN);
+    }
+}
+
+void CommandHandler::handleSyst(const std::string &argument)
+{
+    (void) argument;
+    if (!session)
+        return;
+
+    if (session->isAuthenticated()) {
+        session->sendResponse("215 UNIX Type: L8");
+    } else {
+        session->sendResponse(NOT_LOGGED_IN);
+    }
+}
+
+void CommandHandler::handleNoop(const std::string &argument)
+{
+    (void) argument;
+    if (!session)
+        return;
+
+    session->sendResponse(NOOP_RESPONSE);
 }
 
 void CommandHandler::handleHelp(const std::string &argument)
@@ -305,6 +387,12 @@ void CommandHandler::handleHelp(const std::string &argument)
     help_message += "CDUP - Change to parent directory\n";
     help_message += "PWD - Print working directory\n";
     help_message += "PASV - Enable passive mode\n";
+    help_message += "DELE <file> - Delete file\n";
+    help_message += "RMD <directory> - Remove directory\n";
+    help_message += "PORT <address> - Enable active mode\n";
+    help_message += "TYPE <type> - Set transfer type\n";
+    help_message += "SYST - Show system information\n";
+    help_message += "NOOP - Do nothing\n";
     session->sendResponse(help_message);
 }
 
@@ -349,6 +437,10 @@ void CommandHandler::handleCommand(const std::string &command)
             {"PASV", &CommandHandler::handlePasv},
             {"DELE", &CommandHandler::handleDele},
             {"RMD", &CommandHandler::handleRmd},
+            {"PORT", &CommandHandler::handlePort},
+            {"TYPE", &CommandHandler::handleType},
+            {"SYST", &CommandHandler::handleSyst},
+            {"NOOP", &CommandHandler::handleNoop},
         };
     cmd = cmd.substr(0, cmd.find('\r'));
     cmd = cmd.substr(0, cmd.find('\n'));

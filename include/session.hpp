@@ -5,6 +5,7 @@
 #include <vector>
 #include "auth.hpp"
 #include "directory.hpp"
+#include "transfer.hpp"
 
 enum class DataMode { PASSIVE, ACTIVE };
 
@@ -13,6 +14,7 @@ class Session {
     Session(); // Add this default constructor declaration
     Session(int clientSocket, const std::string &rootDirectory);
     Session(const std::string &rootDirectory);
+    ~Session();
     void setUser(const std::string &username);
     void setPassword(const std::string &password);
     std::string getUser() const
@@ -64,6 +66,9 @@ class Session {
         return rootDirectory;
     }
     std::string getFiles();
+    char transferType = 'A';
+    int transferPort = -1;
+    Transfer transfer = Transfer();
 
   private:
     int clientSocket;
