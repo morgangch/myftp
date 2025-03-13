@@ -10,11 +10,11 @@ Client::Client(int socket_fd) : socket_fd(socket_fd), authenticated(false) {
 }
 
 void Client::sendResponse(const std::string& response) {
-    write(socket_fd, response.c_str(), response.size());
+    write(socket_fd, response.c_str(), response.length(), 0);
 }
 
 std::string Client::receiveCommand() {
-    ssize_t bytes_received = recv(socket_fd, buffer, sizeof(buffer) - 1, 0);
+    ssize_t bytes_received = read(socket_fd, buffer, sizeof(buffer) - 1);
     if (bytes_received > 0) {
         buffer[bytes_received] = '\0'; // Null-terminate the received string
         return std::string(buffer);
