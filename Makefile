@@ -7,7 +7,7 @@
 
 CC = g++
 CFLAGS = -Wall -Wextra -Iinclude
-SRC = 	src/main.cpp src/auth.cpp src/client.cpp src/command_handler.cpp src/ftp_server.cpp src/session.cpp src/transfer.cpp src/directory.cpp
+SRC = 	src/main.cpp src/auth.cpp src/command_handler.cpp src/ftp_server.cpp src/session.cpp src/transfer.cpp src/directory.cpp
 
 NAME = myftp
 OBJ = $(SRC:.cpp=.o)
@@ -21,7 +21,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(NAME)
+	rm -f $(OBJ)
 
 fclean: clean
 	rm -f $(NAME)

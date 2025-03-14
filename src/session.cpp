@@ -60,14 +60,10 @@ void Session::addCommandToHistory(const std::string &command)
 
 void Session::sendResponse(const std::string &response)
 {
-    char *response_cstr = new char[response.size() + 2];
-    std::strcpy(response_cstr, response.c_str());
-    std::strcat(response_cstr, "\n");
-    if (write(clientSocket, response_cstr, strlen(response_cstr)) == -1) {
+    if (write(clientSocket, response.c_str(), response.size()) == -1) {
         std::cerr << "Error sending response to client " << clientSocket
                   << std::endl;
     }
-    delete[] response_cstr;
 }
 
 void Session::closeSession()

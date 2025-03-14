@@ -6,7 +6,6 @@
 #include <unistd.h>
 #include <vector>
 #include "auth.hpp"
-#include "client.hpp"
 #include "constants.hpp"
 #include "command_handler.hpp"
 
