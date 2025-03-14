@@ -85,11 +85,11 @@ void FtpServer::handleNewConnection()
         perror("Accept failed");
         return;
     }
+    write(client_fd, LOGIN_RESPONSE, strlen(LOGIN_RESPONSE));
     fds.push_back({client_fd, POLLIN, 0});
     std::cout << "Client " << client_fd << ": connected" << std::endl;
     client_sessions.emplace(client_fd, Session(rootDirectory));
     client_sessions[client_fd].setSocket(client_fd);
-    client_sessions[client_fd].sendResponse(LOGIN_RESPONSE);
 }
 
 void FtpServer::handleClientRequest(int client_fd, Session &session)
