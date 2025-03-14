@@ -1,6 +1,6 @@
-#define BUFFER_SIZE         1024
+#define BUFFER_SIZE         10240
 #define MAX_COMMAND_HISTORY 10
-#define MAX_CLIENTS         100
+#define MAX_CLIENTS         5000
 
 #define LIST_RESPONSE           "150 Here comes the directory listing"
 #define RETR_RESPONSE           "150 Opening data connection for file transfer"
