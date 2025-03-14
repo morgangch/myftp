@@ -230,7 +230,15 @@ void CommandHandler::handlePwd(const std::string &argument)
         return;
 
     if (session->isAuthenticated()) {
-        session->sendResponse("257 \"" + session->currentDirectory + "\"");
+        std::string response = "257 \"";
+        if (session->currentDirectory == session->getRootDirectory())
+            response += "/";
+        else
+            response += session->currentDirectory[0] == '.' ?
+                            session->currentDirectory.substr(1) :
+                            session->currentDirectory;
+        response += "\"\r\n";
+        session->sendResponse(response);
     } else {
         session->sendResponse(NOT_LOGGED_IN);
     }

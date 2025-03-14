@@ -44,7 +44,9 @@ Session::Session()
 
 Session::~Session()
 {
+    std::cout << "Hello, world!" << std::endl;
     if (clientSocket != -1) {
+        std::cout << "OH SHIT" << std::endl;
         close(clientSocket);
     }
     commandHistory.clear();
