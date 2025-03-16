@@ -57,6 +57,7 @@ void CommandHandler::handleList(const std::string &argument)
         return;
 
     if (session->isAuthenticated()) {
+        session->sendResponse(LIST_RESPONSE);
         std::string files = session->getFiles();
         session->sendResponse(files);
     } else {
