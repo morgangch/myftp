@@ -23,11 +23,8 @@ void CommandHandler::handleUser(const std::string &command)
     std::string username = command.substr(command.find(' ') + 1);
     username = username.substr(0, username.find('\r'));
     username = username.substr(0, username.find('\n'));
-    if (session->auth.validateUser(username)) {
-        session->sendResponse(USER_RESPONSE);
-    } else {
-        session->sendResponse(INVALID_USERNAME);
-    }
+    session->auth.validateUser(username);
+    session->sendResponse(USER_RESPONSE);
 }
 
 void CommandHandler::handlePass(const std::string &argument)
@@ -381,26 +378,27 @@ void CommandHandler::handleHelp(const std::string &argument)
     if (!session)
         return;
 
-    std::string help_message = "214 Help message\nCommands available:\n";
-    help_message += "USER <username> - Log in with username\n";
-    help_message += "PASS <password> - Log in with password\n";
-    help_message += "LIST - List files in current directory\n";
-    help_message += "RETR <filename> - Download file\n";
-    help_message += "STOR <filename> - Upload file\n";
-    help_message += "QUIT - Log out\n";
-    help_message += "HELP - Show help message\n";
-    help_message += "EXIT - Close server\n";
-    help_message += "MKD <directory> - Create directory\n";
-    help_message += "CWD <directory> - Change working directory\n";
-    help_message += "CDUP - Change to parent directory\n";
-    help_message += "PWD - Print working directory\n";
-    help_message += "PASV - Enable passive mode\n";
-    help_message += "DELE <file> - Delete file\n";
-    help_message += "RMD <directory> - Remove directory\n";
-    help_message += "PORT <address> - Enable active mode\n";
-    help_message += "TYPE <type> - Set transfer type\n";
-    help_message += "SYST - Show system information\n";
-    help_message += "NOOP - Do nothing\n";
+    session->sendResponse(HELP_RESPONSE);
+    std::string help_message = "Commands available:\r\n";
+    help_message += "USER <username> - Log in with username\r\n";
+    help_message += "PASS <password> - Log in with password\r\n";
+    help_message += "LIST - List files in current directory\r\n";
+    help_message += "RETR <filename> - Download file\r\n";
+    help_message += "STOR <filename> - Upload file\r\n";
+    help_message += "QUIT - Log out\r\n";
+    help_message += "HELP - Show help message\r\n";
+    help_message += "EXIT - Close server\r\n";
+    help_message += "MKD <directory> - Create directory\r\n";
+    help_message += "CWD <directory> - Change working directory\r\n";
+    help_message += "CDUP - Change to parent directory\r\n";
+    help_message += "PWD - Print working directory\r\n";
+    help_message += "PASV - Enable passive mode\r\n";
+    help_message += "DELE <file> - Delete file\r\n";
+    help_message += "RMD <directory> - Remove directory\r\n";
+    help_message += "PORT <address> - Enable active mode\r\n";
+    help_message += "TYPE <type> - Set transfer type\r\n";
+    help_message += "SYST - Show system information\r\n";
+    help_message += "NOOP - Do nothing\r\n";
     session->sendResponse(help_message);
 }
 
