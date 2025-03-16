@@ -96,9 +96,16 @@ void FtpServer::handleClientRequest(int client_fd, Session &session)
     char buffer[BUFFER_SIZE] = {0};
     size_t bytes_received = read(client_fd, buffer, sizeof(buffer) - 1); // -1 pour le \0
 
+    std::string trimmed = buffer;
+    trimmed.erase(0, trimmed.find_first_not_of("\r\n")); // Enlève espaces/tabs au début
+    trimmed.erase(trimmed.find_last_not_of("\r\n") + 1); // Enlève espaces/tabs à la fin
+
     if (bytes_received <= 0) {
         close(client_fd);
         std::cout << "Client " << client_fd << ": disconnected" << std::endl;
+        return;
+    }
+    if (trimmed.empty()) {
         return;
     }
     

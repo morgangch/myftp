@@ -451,6 +451,7 @@ void CommandHandler::handleCommand(const std::string &command)
     cmd = cmd.substr(0, cmd.find('\r'));
     cmd = cmd.substr(0, cmd.find('\n'));
     if (cmd.empty()) {
+        session->sendResponse(INVALID_COMMAND);
         return;
     }
     auto it = command_map.find(cmd);
