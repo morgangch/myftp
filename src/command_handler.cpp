@@ -358,7 +358,7 @@ void CommandHandler::handleSyst(const std::string &argument)
         return;
 
     if (session->isAuthenticated()) {
-        session->sendResponse("215 UNIX Type: L8");
+        session->sendResponse("215 UNIX Type: L8\r\n");
     } else {
         session->sendResponse(NOT_LOGGED_IN);
     }
